@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mening Yo‘lim</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono&display=swap');
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            background: #171512;
+            color: #eee7d8
+        }
+
+        body {
+            font-family: "Cormorant Garamond", serif;
+            overflow-x: hidden
+        }
+
+        button {
+            font: inherit
+        }
+
+        .stage {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 30px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .stage:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .13;
+            background: radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 2px), radial-gradient(circle at 80% 65%, #fff 0 1px, transparent 2px);
+            background-size: 90px 90px, 130px 130px
+        }
+
+        .book {
+            width: min(1100px, 94vw);
+            height: min(720px, 82vh);
+            min-height: 540px;
+            position: relative;
+            perspective: 1800px
+        }
+
+        .cover {
+            position: absolute;
+            inset: 0;
+            border: 1px solid #776d5b;
+            background: #302a22;
+            box-shadow: 0 30px 90px #0008;
+            display: grid;
+            place-items: center;
+            transform-origin: left center;
+            transition: 1.2s cubic-bezier(.2, .75, .2, 1);
+            z-index: 5;
+            backface-visibility: hidden
+        }
+
+        .cover.open {
+            transform: rotateY(-112deg)
+        }
+
+        .cover-art {
+            width: 86%;
+            height: 86%;
+            border: 1px solid #a79678;
+            position: relative;
+            display: grid;
+            place-items: center;
+            overflow: hidden
+        }
+
+        .cover-art:before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 1px solid #a79678;
+            border-radius: 50%;
+            opacity: .45
+        }
+
+        .cover-art:after {
+            content: "";
+            position: absolute;
+            width: 1px;
+            height: 70%;
+            background: #a79678;
+            opacity: .3
+        }
+
+        .cover-name {
+            position: relative;
+            z-index: 2;
+            text-align: center
+        }
+
+        .cover-name .tiny {
+            font: 10px "DM Mono";
+            letter-spacing: .35em;
+            color: #cbbb9d
+        }
+
+        .cover-name h1 {
+            font-size: clamp(58px, 10vw, 130px);
+            line-height: .72;
+            margin: 22px 0;
+            font-weight: 600;
+            letter-spacing: -.07em
+        }
+
+        .cover-name p {
+            font-size: 17px;
+            letter-spacing: .12em
+        }
+
+        .open-btn {
+            position: absolute;
+            bottom: 7%;
+            padding: 13px 22px;
+            border: 1px solid #bbaa8b;
+            background: transparent;
+            color: #eee7d8;
+            font: 10px "DM Mono";
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            cursor: pointer
+        }
+
+        .open-btn:hover {
+            background: #eee7d8;
+            color: #302a22
+        }
+
+        .pages {
+            position: absolute;
+            inset: 0;
+            background: #ded5c2;
+            color: #211e19;
+            overflow: hidden
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            padding: 55px 8%;
+            overflow: auto;
+            transform: translateX(105%);
+            opacity: 0;
+            transition: transform .65s cubic-bezier(.2, .8, .2, 1), opacity .4s ease
+        }
+
+        .page.active {
+            transform: translateX(0);
+            opacity: 1;
+            z-index: 2
+        }
+
+        .page:last-child {
+            border: 0
+        }
+
+        .page:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .08;
+            background: repeating-linear-gradient(0deg, transparent 0 5px, #5f5545 6px 7px)
+        }
+
+        .page>* {
+            position: relative
+        }
+
+        .meta {
+            font: 10px "DM Mono";
+            letter-spacing: .15em;
+            color: #756b5c
+        }
+
+        h2 {
+            font-size: clamp(45px, 6vw, 82px);
+            line-height: .82;
+            font-weight: 600;
+            letter-spacing: -.06em;
+            margin: 50px 0 25px
+        }
+
+        p {
+            font-size: 21px;
+            line-height: 1.25;
+            max-width: 440px
+        }
+
+        .quote {
+            margin-top: 50px;
+            border-top: 1px solid #817767;
+            border-bottom: 1px solid #817767;
+            padding: 20px 0;
+            font-size: 19px;
+            font-style: italic
+        }
+
+        .page-no {
+            position: absolute;
+            bottom: 25px;
+            right: 6%;
+            font: 10px "DM Mono"
+        }
+
+        .next {
+            position: absolute;
+            right: 6%;
+            bottom: 22px;
+            border: 0;
+            background: #211e19;
+            color: #eee7d8;
+            padding: 11px 17px;
+            font: 10px "DM Mono";
+            cursor: pointer
+        }
+
+        .back {
+            position: absolute;
+            left: 6%;
+            bottom: 22px;
+            border: 1px solid #211e19;
+            background: transparent;
+            padding: 10px 15px;
+            font: 10px "DM Mono";
+            cursor: pointer
+        }
+
+        .page.hidden {
+            display: none
+        }
+
+        @media(max-width:700px) {
+            .stage {
+                padding: 15px
+            }
+
+            .book {
+                height: 88vh;
+                min-height: 620px
+            }
+
+            .pages {
+                grid-template-columns: 1fr
+            }
+
+            .page {
+                padding: 45px 8%
+            }
+
+            .cover-art {
+                width: 88%;
+                height: 88%
+            }
+
+            p {
+                font-size: 19px
+            }
+
+            .cover-name h1 {
+                font-size: 20vw
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stage">
+        <div class="book">
+            <section class="cover" id="cover">
+                <div class="cover-art">
+                    <div class="cover-name">
+                        <div class="tiny">PERSONAL ARCHIVE / 001</div>
+                        <h1>MENING<br>YO‘LIM</h1>
+                        <p>bir insonning davom etayotgan hikoyasi</p>
+                    </div>
+                    <button class="open-btn" onclick="openBook()">BOSHLASH →</button>
+                </div>
+            </section>
+
+            <section class="pages">
+                <article class="page active" id="p1">
+                    <div class="meta">01 / BOSHLANISH</div>
+                    <h2>Men hali<br>yo‘lning<br>boshidaman.</h2>
+                    <p>Men haqimdagi bu sahifa tayyor javoblar haqida emas. Men kim bo‘layotganim, nimalarni
+                        o‘rganayotganim va qayerga borishni xohlayotganim haqida.</p>
+                    <div class="quote">“Har kuni kechagidan bir qadam oldinda bo‘lish kifoya.”</div>
+                    <span class="page-no">01 / 12</span><button class="next" onclick="go(2)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p2">
+                    <div class="meta">02 / MENING XARAKTERIM</div>
+                    <h2>Oson yo‘l<br>meni<br>qiziqtirmaydi.</h2>
+                    <p>Qiyin bo‘lsa ham o‘rganish, tushunmagan narsamni yana bir bor sinash va boshlangan ishni oxiriga
+                        yetkazishga harakat qilish — men uchun muhim.</p>
+                    <div class="quote">“Yo‘l qiyin bo‘lsa, qadamning qadri oshadi.”</div>
+                    <span class="page-no">02 / 12</span><button class="back" onclick="go(1)">← OLDINGI</button><button
+                        class="next" onclick="go(3)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p3">
+                    <div class="meta">03 / BOLALIK</div>
+                    <h2>Hammasi<br>kichik<br>narsadan boshlandi.</h2>
+                    <p>Har bir katta orzuning boshida kichkina qiziqish bo‘ladi. Men ham avval shunchaki qiziqdim. Keyin
+                        sinab ko‘rdim. Keyin esa bu yo‘l menga yoqib qoldi.</p>
+                    <div class="quote">“Boshlanishi kichik bo‘lishi mumkin.”</div>
+                    <span class="page-no">03 / 12</span><button class="back" onclick="go(2)">← OLDINGI</button><button
+                        class="next" onclick="go(4)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p4">
+                    <div class="meta">04 / QIZIQISH</div>
+                    <h2>Narsalarni<br>o‘zim<br>yasashni xohlayman.</h2>
+                    <p>Tayyor narsadan foydalanish yaxshi. Lekin uning qanday ishlashini tushunish va o‘zim yaratib
+                        ko‘rish boshqa hissiyot.</p>
+                    <div class="quote">“Qiziqish — birinchi ustoz.”</div>
+                    <span class="page-no">04 / 12</span><button class="back" onclick="go(3)">← OLDINGI</button><button
+                        class="next" onclick="go(5)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p5">
+                    <div class="meta">05 / MEHNAT</div>
+                    <h2>Natija<br>birdan<br>kelmaydi.</h2>
+                    <p>Ba'zan bir narsani o‘n marta qilib, o‘n birinchi marta to‘g‘ri chiqadi. Muhimi — xato qilgandan
+                        keyin to‘xtab qolmaslik.</p>
+                    <div class="quote">“Sabr ham mehnatning bir qismi.”</div>
+                    <span class="page-no">05 / 12</span><button class="back" onclick="go(4)">← OLDINGI</button><button
+                        class="next" onclick="go(6)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p6">
+                    <div class="meta">06 / O‘RGANISH</div>
+                    <h2>Bugun<br>bilmagan narsam<br>ertaga bilimim.</h2>
+                    <p>Yangi texnologiyalar, yangi g‘oyalar va yangi ko‘nikmalar — mening yo‘limning bir qismi. Bilmagan
+                        narsamdan uyalish emas, uni o‘rganmaslikdan qo‘rqaman.</p>
+                    <div class="quote">“Savol berish — zaiflik emas.”</div>
+                    <span class="page-no">06 / 12</span><button class="back" onclick="go(5)">← OLDINGI</button><button
+                        class="next" onclick="go(7)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p7">
+                    <div class="meta">07 / INTIZOM</div>
+                    <h2>Kayfiyat<br>kutmayman.<br>Boshlayman.</h2>
+                    <p>Har kuni bir xil kayfiyat bo‘lmaydi. Shuning uchun maqsadlarim faqat kayfiyatga bog‘liq bo‘lib
+                        qolmasligini xohlayman.</p>
+                    <div class="quote">“Kichik odatlar katta yo‘lni quradi.”</div>
+                    <span class="page-no">07 / 12</span><button class="back" onclick="go(6)">← OLDINGI</button><button
+                        class="next" onclick="go(8)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p8">
+                    <div class="meta">08 / OILA</div>
+                    <h2>Men uchun<br>eng katta<br>qo‘llab-quvvatlash.</h2>
+                    <p>Ota-onamning ishonchi men uchun oddiy gap emas. Ularning qilgan mehnatini qadrlash va o‘z
+                        yo‘limda yaxshi inson bo‘lib ulg‘ayish — katta maqsadlarimdan biri.</p>
+                    <div class="quote">“Avval inson, keyin natija.”</div>
+                    <span class="page-no">08 / 12</span><button class="back" onclick="go(7)">← OLDINGI</button><button
+                        class="next" onclick="go(9)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p9">
+                    <div class="meta">09 / ORZU</div>
+                    <h2>Bir kun<br>o‘zimga<br>qarayman.</h2>
+                    <p>Va bugungi mehnatimni eslayman. Qancha marta yiqilganim emas, yana qancha marta turganim muhim
+                        bo‘ladi.</p>
+                    <div class="quote">“Orzu yo‘lni ko‘rsatadi, harakat esa olib boradi.”</div>
+                    <span class="page-no">09 / 12</span><button class="back" onclick="go(8)">← OLDINGI</button><button
+                        class="next" onclick="go(10)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p10">
+                    <div class="meta">10 / KELAJAK</div>
+                    <h2>Men hali<br>hammasini<br>bilmayman.</h2>
+                    <p>Lekin qayerga borishni xohlashimni bilaman: bilimli, mas'uliyatli, mustaqil va yaqinlari
+                        ishonadigan inson bo‘lish.</p>
+                    <div class="quote">“Kelajak tayyor holatda kelmaydi.”</div>
+                    <span class="page-no">10 / 12</span><button class="back" onclick="go(9)">← OLDINGI</button><button
+                        class="next" onclick="go(11)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p11">
+                    <div class="meta">11 / O‘ZIMGA SO‘Z</div>
+                    <h2>To‘xtab<br>qolma.</h2>
+                    <p>Hamma narsa tez bo‘lishi shart emas. Muhimi — yo‘nalishni yo‘qotmaslik. Har kuni ozgina bo‘lsa
+                        ham oldinga yur.</p>
+                    <div class="quote">“Bugungi men — kechagi men boshlagan ishning davomiman.”</div>
+                    <span class="page-no">11 / 12</span><button class="back" onclick="go(10)">← OLDINGI</button><button
+                        class="next" onclick="go(12)">KEYINGI →</button>
+                </article>
+
+                <article class="page" id="p12">
+                    <div class="meta">12 / DAVOMI BOR</div>
+                    <h2>Bu oxirgi<br>sahifa.<br>Lekin oxir emas.</h2>
+                    <p>Bu saytning qolgan sahifalarini vaqt yozadi. Men esa ularni o‘z harakatlarim bilan to‘ldiraman.
+                    </p>
+                    <div class="quote">“Keyingi sahifa — hali yozilmagan.”</div>
+                    <span class="page-no">12 / 12</span><button class="back" onclick="go(11)">← OLDINGI</button>
+                </article>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function openBook() {
+            document.getElementById('cover').classList.add('open');
+        }
+        function go(n) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('p' + n).classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
